@@ -1,4 +1,4 @@
-g++ -fpermissive -fopenmp -I. -I Eigen/ sun.cpp  -lgsl -lgslcblas -o asja
+g++ -fpermissive -fopenmp -I. -I Eigen/ sun.cpp  -lgsl -lgslcblas -o askja
 g++ -fpermissive -fopenmp -I. -I Eigen/ measurements1d.cpp  -lgsl -lgslcblas -o measure1d
 g++ -fpermissive -fopenmp -I. -I Eigen/ measurements2d.cpp  -lgsl -lgslcblas -o measure2d
 g++ -fpermissive -fopenmp -I. -I Eigen/ measurements4d.cpp  -lgsl -lgslcblas -o measure4d

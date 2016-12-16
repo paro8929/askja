@@ -1,0 +1,15 @@
+Welcome to ASKA!
+
+The following steps are recommended to install askja on your linux environment. 
+In addition to askja, you will need:
+a) a working GNU GSL library environment, cf. https://www.gnu.org/software/gsl/
+b) The Eigen library package: http://eigen.tuxfamily.org/index.php?title=Main_Page
+
+
+
+
+1) Download the source (e.g. askja-master.zip)
+2) unzip in your favorite directory
+3) go to that directory and add a link to the eigen library "Eigen"
+4) ./compile (you may need to change file permission to make it executable)
+5) This should create the following executables: askja, measure1d, measure2d, measure4d

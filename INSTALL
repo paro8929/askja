@@ -14,3 +14,4 @@ c) A working openMP environment to make use of all cores on your processor
 3) go to that directory and add a link to the eigen library "Eigen"
 4) ./compile (you may need to change file permission to make it executable)
 5) This should create the following executables: askja, measure1d, measure2d, measure4d
+6) See "readme" for what to do with those

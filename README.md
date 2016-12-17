@@ -71,3 +71,43 @@ Do
 ./askja [params_file]
 
 to start an HMC run with the parameters specified in [params_file]
+
+This will initialize the run and start generating a directory called output-DIM[DIM] where it will store diagnostics such with file names such as as "constraints-...", "Wilson-...", as well as gauge configurations called "U-..." with the [...] specifying the parameters for the run with which they were generated. After the number of [STEPS] has passed, the code will stop and shut down and you will have the gauge field configurations stored in the directory output-DIM[DIM]. 
+
+* Extracting observables
+
+To measure observables, use for instance
+
+./measure4d output-DIM[DIM]/master-[...]
+
+This will generate a new directory called rav-DIM[DIM] where measurements will be stored. The current measurement output are the file Nrav-[...], and the most important part is the last line of this file which has 12 columns. These are: 
+
+           1) Configuration Number
+           2) Polyakov loop ensemble average
+           3) Statistical error
+           4) Wilson loop ensemble average
+           5) Statistical error
+           6) Temporal plaquette ensemble average
+           7) Statistical error
+           8) Spatial plaquette ensemble average
+           9) Statistical error
+           10) Lattice sites in temporal (0) direction
+           11) Lattice sites in spatial (1) direction
+           12) BETA value
+     
+You can skip the first 10 configurations of a run (recommended) by e.g. doing
+
+./measure4d output-DIM[DIM]/master-[...] 10
+
+This will reduce sensitivity to the initial (non-thermalized) part of the HMC run.
+
+You can also make measure be more verbose (and skip no steps) by doing
+
+./measure4d output-DIM[DIM]/master-[...] 0 1
+
+Finally, you can make measure measure the eigenvalue distribution of Wilson and Polyakov loops (and not skip any steps or be verbose) by doing
+
+./measure4d output-DIM[DIM]/master-[...] 0 0 1
+
+This will create a file called 'Hist-[...]' in rav-DIM[DIM] which is a histogramm of the eigenvalue arguments. More precisely, the eigenvalues of an SU(N) matrix will be exp(i phi) and the Hist-[...] file will tell you how phi is distributed from [-Pi;Pi]. Note that in doing that any non-trivial winding number is taken out (e.g. the sum of all eigenvalue arguments is renormalized to zero).
+

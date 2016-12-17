@@ -27,14 +27,23 @@ Description:
 'params_params_N8S10T10B20k.txt': This is an example parameter file for an HMC run. It has two columns. Left: text indicator. Right: value. The values on the rhs control the particular run. They are
 
 NC              Number of colors for the simulation (integer)
+
 DIM             Number of parent dimension (integer)
+
 N0              Number of lattice sites in direction of dimension 0 (integer)
+
 N1              Number of lattice sites in direction of dimension 1 (integer)
+
 N2              Number of lattice sites in direction of dimension 2 (integer)
+
 N3              I guess you get the point
+
 N4              
+
 N5              
+
 N6              
+
 N7              
 N8              
 N9              

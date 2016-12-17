@@ -4,6 +4,7 @@ The following steps are recommended to install askja on your linux environment.
 In addition to askja, you will need:
 a) a working GNU GSL library environment, cf. https://www.gnu.org/software/gsl/
 b) The Eigen library package: http://eigen.tuxfamily.org/index.php?title=Main_Page
+c) A working openMP environment to make use of all cores on your processor
 
 
 

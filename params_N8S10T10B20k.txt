@@ -1,0 +1,23 @@
+#Parameters_file
+NC              8
+DIM             10
+N0              10
+N1              10
+N2              1
+N3              1
+N4              1
+N5              1
+N6              1
+N7              1
+N8              1
+N9              1
+BETA            20000
+DT              0.02
+STEPS           10000000
+UPDATE          500
+UPDATE2         1250
+CONFTAKE        10
+LEVEL           8
+VERBOSE         0
+RUNCONTINUE     0
+RANDOM          1

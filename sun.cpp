@@ -8,8 +8,12 @@ Paul Romatschke
 
 
 v1.0: 2016-12-16
+v1.1: 2017-01-03
 
 Copyright is granted if you cite the relevant paper(s)
+such as
+
+https://arxiv.org/abs/1612.06395
 
  ********************/
 
@@ -38,8 +42,8 @@ int CONFTAKE=10; //how often to actually take configurations
 int NACC=0; //number of accepted configurations
 int NAC1=0; //accepted because energy was lowered
 int NREC=0; //number of rejected configurations
+int NTOT=0; //total number of configurations
 int TAKEN=0;
-
 
 int ABORT = 0; //flag signalling to abort asap
 
@@ -907,7 +911,11 @@ void load_parameters(char * paramsfile,struct coord * mygrid)
 	   parameters >> dummyint;
 	   NREC=dummyint;
 
-	   printf("INFO: Taken=%i Nacc=%i Nac1=%i Nrec=%i\n",TAKEN,NACC,NAC1,NREC);  
+	   parameters >> dummychar;
+	   parameters >> dummyint;
+	   NTOT=dummyint;
+
+	   printf("INFO: Taken=%i Nacc=%i Nac1=%i Nrec=%i Ntot=%i\n",TAKEN,NACC,NAC1,NREC,NTOT);  
 	 }
        else
 	 {
@@ -915,7 +923,8 @@ void load_parameters(char * paramsfile,struct coord * mygrid)
 	   TAKEN=0;
 	   NACC=0;
 	   NAC1=0;
-	   NREC=0;	     
+	   NREC=0;
+	   NTOT=0;
 	 }
 
      parameters.close();
@@ -1030,6 +1039,7 @@ void store_parameters(char * infile,char * outfile,int myt, int mytaken)
       myout << "NACC\t\t" << NACC << "\n";
       myout << "NAC1\t\t" << NAC1 << "\n";
       myout << "NREC\t\t" << NREC << "\n";
+      myout << "NTOT\t\t" << NTOT << "\n";
 
      myin.close();
      myout.close();
@@ -1243,6 +1253,8 @@ int main(int argc, char* argv[])
 	      
 	      double myenergy=(EnergyMag()+simpleenergyEl(Pi)/(2*NC))*BETA;
 	      printf("\t INFO: Final energy =%f\n",myenergy);
+	      NTOT++;
+	      
 	      if (myenergy<CRITENERGY) //accept configuration
 		{
 		  printf("\t ACCEPT case 1: %f<%f\n",myenergy,CRITENERGY);
@@ -1251,17 +1263,7 @@ int main(int argc, char* argv[])
 
 		  takeconfiguration();
 
-		  if ((NACC%CONFTAKE==0)&&(NACC>0)) //actually store configuration somewhere
-		    {	
-		      sprintf(buffer,"%s/U-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-%i.conf",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,TAKEN);
-		      storeconf(buffer);
-		      TAKEN++;
-		      
-		      sprintf(buffer,"%s/master-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.params",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);     
-		      store_parameters(paramsfile,buffer,timekeep,TAKEN);
-		      
-		      
-		    }
+		  
 
 		  initializeE(time(NULL));
 		  CRITENERGY=(EnergyMag()+simpleenergyEl(pi)/(2*NC))*BETA;
@@ -1290,20 +1292,6 @@ int main(int argc, char* argv[])
 
 		      takeconfiguration();
 
-		      if (NACC%CONFTAKE==0) //actually store configuration somewher
-			{
-			  sprintf(buffer,"%s/U-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-%i.conf",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,TAKEN);
-			  storeconf(buffer);
-			  TAKEN++;
-
-			  sprintf(buffer,"%s/master-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.params",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);     
-			  store_parameters(paramsfile,buffer,timekeep,TAKEN);
-			  
-			  
-      
-			  
-			}
-		      
 		      initializeE(time(NULL));
 		      CRITENERGY=(EnergyMag()+simpleenergyEl(pi)/(2*NC))*BETA;
 		      printf("\t INFO: initial energy =%f\n",CRITENERGY);
@@ -1323,15 +1311,22 @@ int main(int argc, char* argv[])
 		      initializeE(time(NULL));
 		      CRITENERGY=(EnergyMag()+simpleenergyEl(pi)/(2*NC))*BETA;
 		      printf("\t INFO: initial energy =%f\n",CRITENERGY);
-
-		      
-		      
 		      updateE(dt/2);
 		      //copyDown();
 		      
 		    }
 		}
 	      
+	      if (NTOT%CONFTAKE==0) //actually store configuration somewhere
+		{	
+		  sprintf(buffer,"%s/U-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-%i.conf",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,TAKEN);
+		  storeconf(buffer);
+		  TAKEN++;
+		  
+		  sprintf(buffer,"%s/master-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.params",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);     
+		  store_parameters(paramsfile,buffer,timekeep,TAKEN);
+		}
+
 	      
 	      //sprintf(buffer,"%s/stored-N%i-V%.3f-E%.3f-AT%.4f-DT%.4f-%i",outdir,NC,mygrid.x[0]*AT,ENERGY,AT,dt,timekeep);
 	      //storeall(timekeep,buffer,paramsfile);
@@ -1365,7 +1360,7 @@ int main(int argc, char* argv[])
   free_memory();
   delete [] gens;
 
-  printf("===>Info: Statistics: acc=%i (%i) rec=%i, rate=%f\n",NACC,NAC1,NREC,(NACC*1.0)/(NACC+NREC));
+  printf("===>Info: Statistics: acc=%i (%i) rec=%i, rate=%f\n",NACC,NAC1,NREC,(NACC*1.0)/(NTOT));
   printf("===>Took %i configurations\n",TAKEN);
   
   

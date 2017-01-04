@@ -12,10 +12,10 @@ N7              1
 N8              1
 N9              1
 BETA            20000
-DT              0.02
-STEPS           10000000
+DT              0.005
+STEPS           100000
 UPDATE          500
-UPDATE2         1250
+UPDATE2         1000
 CONFTAKE        10
 LEVEL           8
 VERBOSE         0

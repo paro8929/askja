@@ -12,7 +12,7 @@ N7              1
 N8              1
 N9              1
 BETA            20000
-DT              0.005
+DT              0.01
 STEPS           100000
 UPDATE          500
 UPDATE2         1000

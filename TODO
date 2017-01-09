@@ -1,0 +1,1 @@
+v1.1: The measurement routines are a mess. There should be only one exectuable for all dimensions and it probably should take a parameter file rather than command line arguments.

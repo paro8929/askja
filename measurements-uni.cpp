@@ -749,6 +749,20 @@ void Tab(long int i, double *mdata)
 
 }
 
+void load_measure_params(char * paramsfile)
+{
+
+  fstream parameters;
+  
+ 
+  parameters.open(paramsfile, ios::in);
+  if(parameters.is_open())
+    {
+
+      
+    }
+}
+
 void load_parameters(char * paramsfile,struct coord * mygrid)
 {
 
@@ -931,30 +945,21 @@ int main(int argc, char* argv[])
 {
   
   char *paramsfile;
+  char *mparamsfile;
   struct coord mygrid;
 
-  if (argc>1)
+  if (argc>2)
     {
       paramsfile=argv[1];
-      if (argc>2)
-	{
-	  SKIP=atoi(argv[2]);
-	  if (argc>3)
-	    {
-	      VERBOSE=atoi(argv[3]);
-	      if (argc>4)
-		GET_EV_DIST=atoi(argv[4]);
-	    }
-	}
-      
+      mparamsfile=argv[2];            
     }
   else
     {
-      printf("ERROR please specify a params file name");      
+      printf("ERROR please specify BOTH a params file and a measurement params file name");      
     }
 
   load_parameters(paramsfile, &mygrid);
-
+  load_measure_params(mparamsfile);
   
   
   if (!ABORT)

@@ -1,3 +1,5 @@
+v1.2: unified measurement routine
+
 v1.1: bugfix1 of version 1.0
 
 In version 1.0, configurations were stored only when CONFTAKE trajectories had been accepted. Tom DeGrand pointed out that also rejected configurations have to be counted. This was fixed in version 1.1.

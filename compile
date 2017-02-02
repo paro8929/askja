@@ -1,7 +1,2 @@
 g++ -fpermissive -fopenmp -I. -I Eigen/ sun.cpp  -lgsl -lgslcblas -o askja
-g++ -fpermissive -fopenmp -I. -I Eigen/ measurements1d.cpp  -lgsl -lgslcblas -o measure1d
-g++ -fpermissive -fopenmp -I. -I Eigen/ measurements2d.cpp  -lgsl -lgslcblas -o measure2d
-g++ -fpermissive -fopenmp -I. -I Eigen/ measurements4d.cpp  -lgsl -lgslcblas -o measure4d
 g++ -fpermissive -fopenmp -I. -I Eigen/ measurements-uni.cpp  -lgsl -lgslcblas -o measure
-#g++ -fpermissive -fopenmp -I. scaleEPS.cpp  -lgsl -lgslcblas -o scaleEPS
-#g++ -fpermissive getPexp.cpp -o getPexp

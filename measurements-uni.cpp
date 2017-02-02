@@ -1082,7 +1082,7 @@ int main(int argc, char* argv[])
       sprintf(buffer,"%s/Nrav-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
       rav.open(buffer,ios::out);
 
-      rav << "#TAKEN" << "\t";
+      rav << "#conf" << "\t";
       rav << "P0" << "\t";
       rav << "d(P0)" << "\t";
       rav << "P1" << "\t";
@@ -1232,7 +1232,7 @@ int main(int argc, char* argv[])
 	  printf("Conf %i first pass done!\n",conf);
 	  
 	  if (conf>SKIP)
-	    rav << conf << "\t" << Psum/NAV << "\t 0.\t" << Wssum/NAV << "\t 0.\t" << (Utsum)/NAV << "\t 0.\t" << (Ussum)/NAV << "\t 0.\n";
+	    rav << NAV << "\t" << Psum/NAV << "\t 0.\t" << Wssum/NAV << "\t 0.\t" << (Utsum)/NAV << "\t 0.\t" << (Ussum)/NAV << "\t 0.\n";
 	  //rav << conf << "\t" << Psum/(conf-SKIP+1) << "\t 0.\t" << Wssum/(conf-SKIP+1) << "\t 0.\t" << Plaqsum/(conf-SKIP+1) << "\t 0.\n";
 	  //printf("plaqsum=%f\n",Plaqsum);
 	}

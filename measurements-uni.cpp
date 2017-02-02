@@ -26,6 +26,7 @@ int NREC=0; //number of rejected configurations
 int TAKEN=0;
 
 int SKIP=0;
+int STRIDE=1;
 
 
 int DIM=3; //number of space dimensions, controlled by params file

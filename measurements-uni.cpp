@@ -1232,7 +1232,7 @@ int main(int argc, char* argv[])
 	  printf("Conf %i first pass done!\n",conf);
 	  
 	  if (conf>SKIP)
-	    rav << NAV << "\t" << Psum/NAV << "\t 0.\t" << Wssum/NAV << "\t 0.\t" << (Utsum)/NAV << "\t 0.\t" << (Ussum)/NAV << "\t 0.\n";
+	    rav << conf << "\t" << Psum/NAV << "\t 0.\t" << Wssum/NAV << "\t 0.\t" << (Utsum)/NAV << "\t 0.\t" << (Ussum)/NAV << "\t 0.\n";
 	  //rav << conf << "\t" << Psum/(conf-SKIP+1) << "\t 0.\t" << Wssum/(conf-SKIP+1) << "\t 0.\t" << Plaqsum/(conf-SKIP+1) << "\t 0.\n";
 	  //printf("plaqsum=%f\n",Plaqsum);
 	}
@@ -1397,7 +1397,7 @@ int main(int argc, char* argv[])
       for (int x0=0;x0<xygrid.gridsize.x[0]/2;x0++)
 	dP5sum[x0]/=NAV*NAV;
       
-      rav << TAKEN << "\t";
+      rav << NAV << "\t";
       rav << Psum << "\t";
       rav << sqrt(dPt) << "\t";
       rav << Wssum << "\t";

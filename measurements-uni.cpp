@@ -758,7 +758,28 @@ void load_measure_params(char * paramsfile)
   parameters.open(paramsfile, ios::in);
   if(parameters.is_open())
     {
+      int dummyint;
+      char dummychar[255];
+      double dummydouble;
+      parameters >> dummychar;
+      parameters >> dummychar;
 
+      parameters >> dummychar;
+      parameters >> dummyint;
+      SKIP=dummyint;
+
+      parameters >> dummychar;
+      parameters >> dummyint;
+      STRIDE=dummyint;
+
+      parameters >> dummychar;
+      parameters >> dummyint;
+      GET_EV_DIST=dummyint;
+
+      parameters >> dummychar;
+      parameters >> dummyint;
+      VERBOSE=dummyint;
+      
       
     }
 }

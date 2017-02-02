@@ -18,6 +18,8 @@ int ABORT = 0; //flag signalling to abort asap
 int VERBOSE =0;
 
 int GET_EV_DIST=0;
+int GET_P5_CORR=0;
+int GET_ORDERED_WILSON=0;
 
 int CONFTAKE=10; //how often to actually take configurations
 int NACC=0; //number of accepted configurations
@@ -28,6 +30,7 @@ int TAKEN=0;
 int SKIP=0;
 int STRIDE=1;
 
+int largeD=0;
 
 int DIM=3; //number of space dimensions, controlled by params file
 
@@ -779,6 +782,15 @@ void load_measure_params(char * paramsfile)
 
       parameters >> dummychar;
       parameters >> dummyint;
+      GET_P5_CORR=dummyint;
+
+      parameters >> dummychar;
+      parameters >> dummyint;
+      GET_ORDERED_WILSON=dummyint;
+
+
+      parameters >> dummychar;
+      parameters >> dummyint;
       VERBOSE=dummyint;
       
       
@@ -1023,8 +1035,8 @@ int main(int argc, char* argv[])
       
       
       double Psum=0;
-      double W2sum=0;
-      double Zsum=0;
+      //double W2sum=0;
+      //double Zsum=0;
       double Osum[4];
       for (int i=0;i<4;i++)
 	Osum[i]=0.0;
@@ -1067,20 +1079,43 @@ int main(int argc, char* argv[])
       
       //int TAKEN=12;
       fstream rav;
-      sprintf(buffer,"%s/Nrav-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);
+      sprintf(buffer,"%s/Nrav-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
       rav.open(buffer,ios::out);
 
+      rav << "#TAKEN" << "\t";
+      rav << "P0" << "\t";
+      rav << "d(P0)" << "\t";
+      rav << "P1" << "\t";
+      rav << "dP1" << "\t";
+      rav << "U0" << "\t";
+      rav << "dU0" << "\t";
+      rav << "U1" << "\t";
+      rav << "dU1" << "\t";
+      rav << "N0" << "\t";
+      rav << "N1" << "\t";      
+      rav << "BETA" << "\t";
+      rav << endl;
+      
       fstream P5corr,Hist;
       fstream W2;
 
-      sprintf(buffer,"%s/W24-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);
-      W2.open(buffer,ios::out);
-      
-      sprintf(buffer,"%s/P5corr-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);
-      P5corr.open(buffer,ios::out);
+      if (GET_ORDERED_WILSON)
+	{
+	  sprintf(buffer,"%s/WO-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+	  W2.open(buffer,ios::out);
+	}
 
-      sprintf(buffer,"%s/Hist-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE);
-      Hist.open(buffer,ios::out);
+      if (GET_P5_CORR)
+	{
+	  sprintf(buffer,"%s/P5corr-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+	  P5corr.open(buffer,ios::out);
+	}
+
+      if (GET_EV_DIST)
+	{
+	  sprintf(buffer,"%s/Hist-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+	  Hist.open(buffer,ios::out);
+	}
       
 
       sprintf(outdir,"output-DIM%i",DIM);
@@ -1088,22 +1123,26 @@ int main(int argc, char* argv[])
       printf("===> Info: opening files finished\n");
 
 
-      int largeD=0;
-      for (int dir=2;dir<xygrid.gridsize.d;dir++)
+      //int largeD=0;
+      for (int dir=0;dir<xygrid.gridsize.d;dir++)
 	{
 	  if (xygrid.gridsize.x[dir]>1)
 	    largeD++;
 	}
-      printf("found %i large D\n",largeD+2);
+      //printf("found %i large D\n",largeD);
 	      
+      int NAV=0;
       
-      for (int conf=SKIP;conf<TAKEN;conf++)//first pass
+      for (int conf=SKIP;conf<TAKEN;conf+=STRIDE)//first pass
 	{
 	  sprintf(buffer,"%s/U-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-%i.conf",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,conf);
 	  loadconf(buffer);
-	  PolyakovLoop(evs);
-	  WilsonLoop(evsW,1);	  
-	  scalarLoopcorr(P5);
+	  if (largeD>0)
+	    PolyakovLoop(evs);
+	  if (largeD>1)
+	    WilsonLoop(evsW,1);
+	  if (GET_P5_CORR)
+	    scalarLoopcorr(P5);
 	  double Ut,Us;
 	  PlaqExp(&Ut,&Us);
 
@@ -1139,36 +1178,42 @@ int main(int argc, char* argv[])
 	  //printf("conf=%i Wx=%f Plaq=%f\n",conf,evs[0],2*NC*em/AT);
 	  Wssum+=evsW[0];
 	  Psum+=evs[0];
-	  double Otemp[largeD+2];
-	  for (int i=0;i<largeD+2;i++)
+	  double Otemp[largeD];
+	  for (int i=0;i<largeD;i++)
 	    Otemp[i]=0;
-	  
-	  Otemp[0]=evs[0];
-	  Otemp[1]=evsW[0];
 
-	  W2sum+=evs[0]*evs[0];
-	  W2sum+=evsW[0]*evsW[0];
-	  if (evs[0]>0.5)
-	    Zsum+=1.0;
-	  if (evsW[0]>0.5)
-	    Zsum+=1.0;	  
+	  if (largeD>0)
+	    Otemp[0]=evs[0];
+	  if (largeD>1)
+	    Otemp[1]=evsW[0];
 
-	  for (int dir=2;dir<largeD+2;dir++)
+	  //W2sum+=evs[0]*evs[0];
+	  //W2sum+=evsW[0]*evsW[0];
+	  //if (evs[0]>0.5)
+	  //  Zsum+=1.0;
+	  //if (evsW[0]>0.5)
+	  //  Zsum+=1.0;	  
+
+	  if (largeD>2)
 	    {
-	      WilsonLoop(evsW,dir);
-	      Otemp[dir]=evsW[0];
-	      W2sum+=evsW[0]*evsW[0];
-	      if (evsW[0]>0.5)
-		Zsum+=1.0;
+	      for (int dir=2;dir<largeD;dir++)
+		{
+		  WilsonLoop(evsW,dir);
+		  Otemp[dir]=evsW[0];
+		  //W2sum+=evsW[0]*evsW[0];
+		  //if (evsW[0]>0.5)
+		  //  Zsum+=1.0;
+		}
 	    }
 	
 	      
-	  std::vector<double> myvector (Otemp, Otemp+largeD+2);
-	  std::sort (myvector.begin(), myvector.begin()+largeD+2);
+	  std::vector<double> myvector (Otemp, Otemp+largeD);
+	  std::sort (myvector.begin(), myvector.begin()+largeD);
 
-	  for (int i=0;i<largeD+2;i++)
+	  for (int i=0;i<largeD;i++)
 	    {
-	      printf("i=%i v=%f\n",i,myvector[i]);
+	      if (VERBOSE)
+		printf("i=%i v=%f\n",i,myvector[i]);
 	      Osum[i]+=myvector[i];
 	    }
 	  
@@ -1183,11 +1228,11 @@ int main(int argc, char* argv[])
 	    }
 	  
 
-	  
+	  NAV++;
 	  printf("Conf %i first pass done!\n",conf);
 	  
 	  if (conf>SKIP)
-	    rav << conf << "\t" << Psum/(conf-SKIP+1) << "\t 0.\t" << Wssum/(conf-SKIP+1) << "\t 0.\t" << (Utsum)/(conf-SKIP+1) << "\t 0.\t" << (Ussum)/(conf-SKIP+1) << "\t 0.\n";
+	    rav << conf << "\t" << Psum/NAV << "\t 0.\t" << Wssum/NAV << "\t 0.\t" << (Utsum)/NAV << "\t 0.\t" << (Ussum)/NAV << "\t 0.\n";
 	  //rav << conf << "\t" << Psum/(conf-SKIP+1) << "\t 0.\t" << Wssum/(conf-SKIP+1) << "\t 0.\t" << Plaqsum/(conf-SKIP+1) << "\t 0.\n";
 	  //printf("plaqsum=%f\n",Plaqsum);
 	}
@@ -1203,20 +1248,18 @@ int main(int argc, char* argv[])
 	    }*/
       
       
-      Psum/=(TAKEN-SKIP);
-      Wssum/=(TAKEN-SKIP);
-      W2sum/=(TAKEN-SKIP);
-	Zsum/=(TAKEN-SKIP);
-
-      Utsum/=(TAKEN-SKIP);
-      Ussum/=(TAKEN-SKIP);
+      Psum/=NAV;
+      Wssum/=NAV;
+      Utsum/=NAV;
+      Ussum/=NAV;
       for (int x0=0;x0<xygrid.gridsize.x[0];x0++)
-	P5sum[x0]/=(TAKEN-SKIP);
+	P5sum[x0]/=NAV;
 
-      for (int i=0;i<largeD+2;i++)
+      for (int i=0;i<largeD;i++)
 	{
-	  Osum[i]/=(TAKEN-SKIP);
-	  printf("i=%i osum=%f\n",i,Osum[i]);
+	  Osum[i]/=NAV;
+	  if (VERBOSE)
+	    printf("i=%i osum=%f\n",i,Osum[i]);
 	}
       
       //P5totsum/=(xygrid.gridsize.x[0]/2)*(TAKEN-SKIP);
@@ -1238,13 +1281,13 @@ int main(int argc, char* argv[])
       double dP=0;
       double dPt=0;
       double dZ=0;
-      double dO[largeD+2];
+      double dO[largeD];
 
       
       double dUt=0,dUs=0;
       double dP5sum[xygrid.gridsize.x[0]/2];
       int dWhist[bins],dPhist[bins];
-      double dW2=0;
+      //double dW2=0;
 
       
       if (GET_EV_DIST)
@@ -1262,24 +1305,28 @@ int main(int argc, char* argv[])
 	 dP5sum[x0]=0;
 
       
-      for (int conf=SKIP;conf<TAKEN;conf++)//second pass
+      for (int conf=SKIP;conf<TAKEN;conf+=STRIDE)//second pass
 	{
 	  sprintf(buffer,"%s/U-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-%i.conf",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,conf);
 	  loadconf(buffer);
-
-	  PolyakovLoop(evs);
-	  WilsonLoop(evsW,1);
+	  if (largeD>0)
+	    PolyakovLoop(evs);
+	  if (largeD>1)
+	    WilsonLoop(evsW,1);
 	  double Ut,Us;
-	  scalarLoopcorr(P5);
+	  if (GET_P5_CORR)
+	    scalarLoopcorr(P5);
 	  
 	  PlaqExp(&Ut,&Us);
 
-	  double Otemp[largeD+2];
-	  for (int i=0;i<largeD+2;i++)
+	  double Otemp[largeD];
+	  for (int i=0;i<largeD;i++)
 	    Otemp[i]=0;
-	  
-	  Otemp[0]=evs[0];
-	  Otemp[1]=evsW[0];
+
+	  if (largeD>0)
+	    Otemp[0]=evs[0];
+	  if (largeD>1)
+	    Otemp[1]=evsW[0];
 
 	      
 	  //double em=EnergyMag();
@@ -1295,28 +1342,31 @@ int main(int argc, char* argv[])
 	  if (evsW[0]>0.5)
 	    temp2+=1.0;
 
-	  double temp=evs[0]*evs[0]-W2sum;
-	  temp+=evsW[0]*evsW[0];
-	  for (int dir=2;dir<largeD+2;dir++)
+	  //double temp=evs[0]*evs[0]-W2sum;
+	  //temp+=evsW[0]*evsW[0];
+	  if (largeD>2)
 	    {
-	      WilsonLoop(evsW,dir);
-	      temp+=evsW[0]*evsW[0];
-	      if (evsW[0]>0.5)
-		temp2+=1.0;
-	      Otemp[dir]=evsW[0];
+	      for (int dir=2;dir<largeD;dir++)
+		{
+		  WilsonLoop(evsW,dir);
+		  //temp+=evsW[0]*evsW[0];
+		  //if (evsW[0]>0.5)
+		  //  temp2+=1.0;
+		  Otemp[dir]=evsW[0];
+		}
 	    }
 	    
-	  std::vector<double> myvector (Otemp, Otemp+largeD+2);
-	  std::sort (myvector.begin(), myvector.begin()+largeD+2);
+	  std::vector<double> myvector (Otemp, Otemp+largeD);
+	  std::sort (myvector.begin(), myvector.begin()+largeD);
 
-	  for (int i=0;i<largeD+2;i++)
+	  for (int i=0;i<largeD;i++)
 	    {
 	      //printf("i=%i v=%f\n",i,myvector[i]);
 	      dO[i]+=(myvector[i]-Osum[i])*(myvector[i]-Osum[i]);
 	    }
 	  
-	  dW2+=temp*temp;
-	  dZ+=(temp2-Zsum)*(temp2-Zsum);
+	  //dW2+=temp*temp;
+	  //dZ+=(temp2-Zsum)*(temp2-Zsum);
 
 	  dUt+=(Ut*BETA/vol-Utsum)*(Ut*BETA/vol-Utsum);
 	  dUs+=(Us*BETA/vol-Ussum)*(Us*BETA/vol-Ussum);
@@ -1333,19 +1383,19 @@ int main(int argc, char* argv[])
 	  printf("Conf %i second pass done!\n",conf);
 	  
 	}
-      dW/=(TAKEN-SKIP)*(TAKEN-SKIP);
-      dW2/=(TAKEN-SKIP)*(TAKEN-SKIP);
+      dW/=NAV*NAV;
+      //dW2/=(TAKEN-SKIP)*(TAKEN-SKIP);
       //dP/=(TAKEN-SKIP)*(TAKEN-SKIP);
-      dPt/=(TAKEN-SKIP)*(TAKEN-SKIP);
-      dUt/=(TAKEN-SKIP)*(TAKEN-SKIP);
-      dUs/=(TAKEN-SKIP)*(TAKEN-SKIP); 
-      dZ/=(TAKEN-SKIP)*(TAKEN-SKIP);
+      dPt/=NAV*NAV;
+      dUt/=NAV*NAV;
+      dUs/= NAV*NAV;
+      //dZ/=(TAKEN-SKIP)*(TAKEN-SKIP);
 
-      for (int i=0;i<largeD+2;i++)
-	dO[i]/=(TAKEN-SKIP)*(TAKEN-SKIP);
+      for (int i=0;i<largeD;i++)
+	dO[i]/=NAV*NAV;
 	
       for (int x0=0;x0<xygrid.gridsize.x[0]/2;x0++)
-	dP5sum[x0]/=(TAKEN-SKIP)*(TAKEN-SKIP);
+	dP5sum[x0]/=NAV*NAV;
       
       rav << TAKEN << "\t";
       rav << Psum << "\t";
@@ -1363,34 +1413,49 @@ int main(int argc, char* argv[])
 
       rav.close();
 
-      W2 << "#NC" << "\t" << "BETA" << "\t" << "Ns" <<"\t"<< "W2" << "\t" << "dW2" << "\t" << "Z \t dZ \t ordered Ws\t\t\t\t"  << "conf" << "\t" << "SKIP" << endl;
-      W2 << NC    << "\t" << BETA << "\t" << xygrid.gridsize.x[1] << "\t" << W2sum << "\t" << sqrt(dW2) << "\t" << Zsum << "\t" << sqrt(dZ) << "\t";
-
-      for (int i=0;i<largeD+2;i++)
-	W2 << Osum[i] << "\t" << dO[i] <<"\t";
       
-      W2 << TAKEN-SKIP << "\t" << SKIP << endl;
-      
-      
-      for (int x0=0;x0<xygrid.gridsize.x[0]/2;x0++)
+      if (GET_ORDERED_WILSON)
 	{
-	  P5corr << x0 << "\t";
-	  P5corr << dP5sum[x0] << "\t";
-	  //P5corr << sqrt(dP5sum[x0]) << "\t";
+	  //W2 << "#NC" << "\t" << "BETA" << "\t" << "Ns" <<"\t"<< "W2" << "\t" << "dW2" << "\t" << "Z \t dZ \t ordered Ws\t\t\t\t"  << "conf" << "\t" << "SKIP" << endl;
+	  W2 << "#NC" << "\t" << "BETA" << "\t" << "Ns" <<"\t"<< "ordered Ws\t\t\t\t"  << "tot conf" << "\t" << "SKIP" << endl;
+	  //W2 << NC    << "\t" << BETA << "\t" << xygrid.gridsize.x[1] << "\t" << W2sum << "\t" << sqrt(dW2) << "\t" << Zsum << "\t" << sqrt(dZ) << "\t";
+	  W2 << NC    << "\t" << BETA << "\t" << xygrid.gridsize.x[1] << "\t";
+	
+
+	  for (int i=0;i<largeD;i++)
+	    W2 << Osum[i] << "\t" << sqrt(dO[i]) <<"\t";
+	  
+	  W2 << TAKEN<< "\t" << SKIP << endl;
+	}
+      
+      if (GET_P5_CORR)
+	{
+	  for (int x0=0;x0<xygrid.gridsize.x[0]/2;x0++)
+	    {
+	      P5corr << x0 << "\t";
+	      P5corr << dP5sum[x0] << "\t";
+	      //P5corr << sqrt(dP5sum[x0]) << "\t";
 	  P5corr << endl;
+	    }
 	}
 
-      for (int i=0;i<bins;i++)
+      if (GET_EV_DIST)
 	{
-	  double dummydouble=-M_PI+(i+0.5)*width;
-	  Hist << dummydouble << "\t" << Phist[i]/(1.0*TAKEN-SKIP);
-	  Hist << "\t" << Whist[i]/(1.0*TAKEN-SKIP);
-	  Hist << endl;
+	  for (int i=0;i<bins;i++)
+	    {
+	      double dummydouble=-M_PI+(i+0.5)*width;
+	      Hist << dummydouble << "\t" << Phist[i]/(1.0*NAV);
+	      Hist << "\t" << Whist[i]/(1.0*NAV);
+	      Hist << endl;
+	    }
 	}
 
-      W2.close();
-      P5corr.close();
-      Hist.close();
+      if (GET_ORDERED_WILSON)
+	W2.close();
+      if(GET_P5_CORR)
+	P5corr.close();
+      if (GET_EV_DIST)
+	Hist.close();
       
       printf("Nt=%i Ns=%i BETA=%.2f <Wt>=%f+-%f <Wx>=%f+-%f Ut=%f+-%f Us=%f+-%f\n",mygrid.x[0],mygrid.x[1],BETA,Psum,sqrt(dPt),Wssum,sqrt(dW),Utsum,sqrt(dUt),Ussum,sqrt(dUs));
        

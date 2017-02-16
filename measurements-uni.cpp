@@ -1079,7 +1079,7 @@ int main(int argc, char* argv[])
       
       //int TAKEN=12;
       fstream rav;
-      sprintf(buffer,"%s/Nrav-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+      sprintf(buffer,"%s/Nrav-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-SKIP%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,SKIP,STRIDE);
       rav.open(buffer,ios::out);
 
       rav << "#conf" << "\t";
@@ -1101,19 +1101,19 @@ int main(int argc, char* argv[])
 
       if (GET_ORDERED_WILSON)
 	{
-	  sprintf(buffer,"%s/WO-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+	  sprintf(buffer,"%s/WO-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-SKIP%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,SKIP,STRIDE);
 	  W2.open(buffer,ios::out);
 	}
 
       if (GET_P5_CORR)
 	{
-	  sprintf(buffer,"%s/P5corr-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+	  sprintf(buffer,"%s/P5corr-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-SKIP%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,SKIP,STRIDE);
 	  P5corr.open(buffer,ios::out);
 	}
 
       if (GET_EV_DIST)
 	{
-	  sprintf(buffer,"%s/Hist-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,STRIDE);
+	  sprintf(buffer,"%s/Hist-N%i-Nt%i-Ns%i-BETA%.2f-DT%.4f-U%.4f-CT%i-SKIP%i-STRIDE%i.dat",outdir,NC,mygrid.x[0],mygrid.x[1],BETA,dt,UPDATE2*dt,CONFTAKE,SKIP,STRIDE);
 	  Hist.open(buffer,ios::out);
 	}
       
